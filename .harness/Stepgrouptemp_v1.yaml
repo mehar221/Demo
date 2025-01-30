@@ -1,0 +1,25 @@
+template:
+  name: Step-group-temp
+  type: StepGroup
+  projectIdentifier: Manisha
+  orgIdentifier: default
+  spec:
+    steps:
+      - step:
+          type: Run
+          name: Run_1
+          identifier: Run_1
+          spec:
+            shell: Sh
+            command: |-
+              echo "1. Client ID is : $Var_one"
+              echo "2. Client ID is : <+stepGroup.variables.Var_one>"
+    variables:
+      - name: Var_one
+        type: Secret
+        value: var_one
+        description: ""
+        required: false
+    stageType: Custom
+  identifier: Stepgrouptemp
+  versionLabel: v1

@@ -1,0 +1,83 @@
+pipeline:
+  name: terraform-test
+  identifier: terraformtest
+  projectIdentifier: Manisha
+  orgIdentifier: default
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        repoName: tf-input-set
+        build: <+input>
+        sparseCheckout: []
+  stages:
+    - stage:
+        name: test-terraform
+        identifier: testterraform
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          caching:
+            enabled: true
+          buildIntelligence:
+            enabled: true
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: harnessk8sconnector
+              namespace: harness-delegate-ng
+              automountServiceAccountToken: true
+              nodeSelector: {}
+              os: Linux
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Install_tools
+                  identifier: Install_tools
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: nginx
+                    shell: Sh
+                    command: |-
+                      apt-get update && apt-get install -y wget gnupg
+
+                       apt-get update && apt-get install -y lsb-release
+                      wget -O - https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+                      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+                      apt update && apt install terraform -y
+                      apt-get update && apt-get install -y git
+                      git config --global url."https://user:<+secrets.getValue("PAT")>@git.harness.io".insteadOf "https://git.harness.io"
+                      terraform init
+                      terraform fmt
+                      terraform validate
+              - step:
+                  type: Run
+                  name: Run_2
+                  identifier: Run_2
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: nginx
+                    shell: Sh
+                    command: |-
+                      apt-get update && apt-get install -y git
+                      git config --global url."https://user:<+secrets.getValue("PAT")>@git.harness.io".insteadOf "https://git.harness.io"
+                      terraform init
+                      terraform fmt
+                      terraform validate
+                  when:
+                    stageStatus: Success
+                    condition: "false"
+  notificationRules:
+    - name: not-one
+      identifier: notone
+      pipelineEvents:
+        - type: AllEvents
+      notificationMethod:
+        type: Email
+        spec:
+          userGroups:
+            - _project_all_users
+          recipients: []
+      enabled: true

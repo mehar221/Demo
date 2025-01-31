@@ -1,0 +1,82 @@
+pipeline:
+  name: test-pip-api
+  identifier: testpipapi
+  projectIdentifier: Manisha
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: build
+        identifier: build
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: false
+          caching:
+            enabled: true
+          buildIntelligence:
+            enabled: true
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: harnessk8sconnector
+              namespace: harness-delegate-ng
+              automountServiceAccountToken: true
+              nodeSelector: {}
+              os: Linux
+          execution:
+            steps:
+              - stepGroup:
+                  name: Mystepgroup
+                  identifier: Mystepgroup
+                  steps:
+                    - step:
+                        type: Run
+                        name: Run_1
+                        identifier: Run_1
+                        spec:
+                          connectorRef: account.harnessImage
+                          image: nginx
+                          shell: Sh
+                          command: |-
+                            echo "1. Client ID is : $Var_one"
+                            echo "2. Client ID is : <+execution.steps.Mystepgroup.variables.Var_one>"
+                            echo "3. Third Variable : <+execution.steps.Mystepgroup.variables.Var_two>"
+                            mysecret=<+execution.steps.Mystepgroup.variables.Var_one>
+                          outputVariables:
+                            - name: mysecret
+                              type: String
+                              value: mysecret
+                  variables:
+                    - name: Var_one
+                      type: Secret
+                      value: Var_new
+                      description: ""
+                      required: false
+                    - name: Var_two
+                      type: String
+                      value: heyyyy
+                      description: ""
+                      required: false
+        variables:
+          - name: stage_var
+            type: Secret
+            description: ""
+            required: false
+            value: var_one
+  variables:
+    - name: env
+      type: String
+      description: ""
+      required: false
+      value: <+secret.getValue(var_one)>
+  notificationRules:
+    - name: not-one
+      identifier: notone
+      pipelineEvents:
+        - type: AllEvents
+      notificationMethod:
+        type: Webhook
+        spec:
+          webhookUrl: "\thttps://webhook.site/016ce83f-f9f1-4f8a-9542-5b72e2f30489"
+      enabled: true

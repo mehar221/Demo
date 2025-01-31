@@ -6,8 +6,8 @@ pipeline:
   tags: {}
   stages:
     - stage:
-        name: hi
-        identifier: hi
+        name: test-stage
+        identifier: teststage
         description: ""
         type: Custom
         spec:

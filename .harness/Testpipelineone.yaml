@@ -6,11 +6,27 @@ pipeline:
   tags: {}
   stages:
     - stage:
-        name: stage-one
-        identifier: stageone
+        name: test
+        identifier: test
         description: ""
-        type: Custom
+        type: Deployment
         spec:
+          deploymentType: Kubernetes
+          service:
+            serviceRef: rolloutsvc
+            serviceInputs:
+              serviceDefinition:
+                type: Kubernetes
+                spec:
+                  artifacts:
+                    primary:
+                      primaryArtifactRef: <+input>
+                      sources: <+input>
+          environment:
+            environmentRef: Myenv
+            deployToAll: false
+            infrastructureDefinitions:
+              - identifier: testinfra
           execution:
             steps:
               - step:
@@ -23,10 +39,15 @@ pipeline:
                     source:
                       type: Inline
                       spec:
-                        script: |-
-                          echo "hey"
-                          echo "hello"
+                        script: echo "$list =Get-ChildItem -Path Env:* | Sort-Object Name"
                     environmentVariables: []
                     outputVariables: []
                   timeout: 10m
+            rollbackSteps: []
         tags: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback

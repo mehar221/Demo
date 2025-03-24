@@ -21,9 +21,5 @@ template:
         description: ""
         required: false
     stageType: Custom
-    stepGroupInfra:
-      type: KubernetesDirect
-      spec:
-        connectorRef: harnessk8sconnector
   identifier: Stepgrouptemp
   versionLabel: v1

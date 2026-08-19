@@ -16,8 +16,6 @@ spec:
     monoRepo: false
     url: https://github.com/mehar221/harness-entities/tree/main
 metadata:
-  annotations:
-    backstage.io/source-location: url:https://github.com/mehar221/Demo/tree/main
   tags:
   - java
   - dev
